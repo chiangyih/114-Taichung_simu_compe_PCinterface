@@ -1,504 +1,504 @@
-# �q�T��w�W�� - PC ? MCU
+﻿# 通訊協定規格 - PC <-> MCU
 
-## ������T
-- **��󪩥�**: v1.0
-- **�̫��s**: 2025-01-03
-- **�A�αM��**: 114-���ϼ��������v�� - �q�����@�ĤG��
+## 版本資訊
+- **文件版本**: v1.0
+- **最後更新**: 2025-01-03
+- **適用專案**: 114-中區模擬技藝競賽 - 電腦修護第二站
 
 ---
 
-## �ǦC��]�w
+## 序列埠設定
 
-| �Ѽ� | �]�w�� |
+| 參數 | 設定值 |
 |------|--------|
-| �i�S�v (Baud Rate) | 9600 |
-| ��Ʀ줸 (Data Bits) | 8 |
-| �P�줸�ˬd (Parity) | None |
-| ����줸 (Stop Bits) | 1 |
-| Ū���W�� (Read Timeout) | 2000 ms |
-| �g�J�W�� (Write Timeout) | 2000 ms |
+| 波特率 (Baud Rate) | 9600 |
+| 資料位元 (Data Bits) | 8 |
+| 同位元檢查 (Parity) | None |
+| 停止位元 (Stop Bits) | 1 |
+| 讀取超時 (Read Timeout) | 2000 ms |
+| 寫入超時 (Write Timeout) | 2000 ms |
 
 ---
 
-## �iPC �� MCU�j�R�O�榡
+## 【PC → MCU】命令格式
 
-### �����Ʈ榡�K�n��
+### 完整資料格式摘要表
 
-| �R�O���� | �榡 | �d�� | Ĳ�o�覡 | ���� |
+| 命令類型 | 格式 | 範例 | 觸發方式 | 說明 |
 |---------|------|------|---------|------|
-| **��l�ƴ���** | `HELLO` | `HELLO\r\n` | Open ���s | �s�u�إ߮ɪ���l�ƴ��� |
-| **�ɶ��P�B** | `Tyyyy/MM/dd HH:mm:ss` | `T2025/01/03 14:30:45\r\n` | �۰�(�C��)�B��ʫ��s�B�Ҧ�2���� | �ǰe PC �t�ήɶ��� MCU |
-| **�t�θ�T** | `Scpu=XX;ram=X.X/XX.X` | `Scpu=58;ram=8.3/15.9\r\n` | �۰�(�C��)�B�Ҧ�3���� | �ǰe CPU �ϥβv�P RAM �ϥζq |
-| **�Ҧ����� 1** | `M1` | `M1\r\n` | �Ҧ������ | ��������w�ù��Ҧ� |
-| **�Ҧ����� 2** | `M2` | `M2\r\n` | �Ҧ������ | ��������ܳ]�m�Ҧ��]���a�ɶ��P�B�^ |
-| **�Ҧ����� 3** | `M3` | `M3\r\n` | �Ҧ������ | �����ܹq����T�Ҧ��]���a�t�θ�T�^ |
-| **Ū�� EEPROM** | `R` | `R\r\n` | Read ���s | �ШDŪ�� LED �}��]�w�� |
-| **�g�J EEPROM** | `Lxxx` | `L230\r\n` | Write ���s | �g�J LED �}��ȡ]�d��G1-254�^ |
+| **初始化握手** | `HELLO` | `HELLO\r\n` | Open 按鈕 | 連線建立時的初始化握手 |
+| **時間同步** | `Tyyyy/MM/dd HH:mm:ss` | `T2025/01/03 14:30:45\r\n` | 自動(每秒)、手動按鈕、模式2切換 | 傳送 PC 系統時間至 MCU |
+| **系統資訊** | `Scpu=XX;ram=X.X/XX.X` | `Scpu=58;ram=8.3/15.9\r\n` | 自動(每秒)、模式3切換 | 傳送 CPU 使用率與 RAM 使用量 |
+| **模式切換 1** | `M1` | `M1\r\n` | 模式選單選擇 | 切換至鎖定螢幕模式 |
+| **模式切換 2** | `M2` | `M2\r\n` | 模式選單選擇 | 切換至顯示設置模式（附帶時間同步） |
+| **模式切換 3** | `M3` | `M3\r\n` | 模式選單選擇 | 切換至電腦資訊模式（附帶系統資訊） |
+| **讀取 EEPROM** | `R` | `R\r\n` | Read 按鈕 | 請求讀取 LED 腳位設定值 |
+| **寫入 EEPROM** | `Lxxx` | `L230\r\n` | Write 按鈕 | 寫入 LED 腳位值（範圍：1-254） |
 
 ---
 
-## �iMCU �� PC�j�^���榡
+## 【MCU → PC】回應格式
 
-| �^������ | �榡 | �d�� | ���� |
+| 回應類型 | 格式 | 範例 | 說明 |
 |---------|------|------|------|
-| **�R�O�T�{** | `OK` | `OK\r\n` | �R�O���榨�\���q�Φ^�� |
-| **EEPROM Ū����** | `VAL=xxx` | `VAL=255\r\n` | �^�� EEPROM ���x�s�� LED �}��� |
-| **�g�J���\** | `WRITE OK` | `WRITE OK\r\n` | EEPROM �g�J�ާ@���\ |
+| **命令確認** | `OK` | `OK\r\n` | 命令執行成功的通用回應 |
+| **EEPROM 讀取值** | `VAL=xxx` | `VAL=255\r\n` | 回傳 EEPROM 中儲存的 LED 腳位值 |
+| **寫入成功** | `WRITE OK` | `WRITE OK\r\n` | EEPROM 寫入操作成功 |
 
 ---
 
-## �i�����Ÿ������j
+## 【結束符號說明】
 
-### �����Ÿ��W��
+### 結束符號規格
 
-�Ҧ��q�T��ƪ�**�����Ÿ�**���G**CRLF** (`\r\n`)
+所有通訊資料的**結束符號**為：**CRLF** (`\r\n`)
 
 - **CR** (Carriage Return): ASCII 13 (0x0D)
 - **LF** (Line Feed): ASCII 10 (0x0A)
-- **�զX**: `\r\n` �� `CRLF`
+- **組合**: `\r\n` 或 `CRLF`
 
-### ��@�覡
+### 實作方式
 
-#### PC �ݵo�e
-�{���ϥ� `SerialPort.WriteLine()` ��k�A�|**�۰ʪ��[** `\r\n` �ܨC�өR�O�G
+#### PC 端發送
+程式使用 `SerialPort.WriteLine()` 方法，會**自動附加** `\r\n` 至每個命令：
 
 ```vb
 Private Sub SendCommand(command As String)
     If serialPort IsNot Nothing AndAlso serialPort.IsOpen Then
-        serialPort.WriteLine(command)  ' �۰ʥ[�W \r\n
+        serialPort.WriteLine(command)  ' 自動加上 \r\n
         Debug.WriteLine("Sent: " & command)
     End If
 End Sub
 ```
 
-**��ڶǰe�d��**�G
-- �{���X�G`SendCommand("HELLO")`
-- ��ڶǰe�G`HELLO\r\n` (ASCII: `48 45 4C 4C 4F 0D 0A`)
+**實際傳送範例**：
+- 程式碼：`SendCommand("HELLO")`
+- 實際傳送：`HELLO\r\n` (ASCII: `48 45 4C 4C 4F 0D 0A`)
 
-#### PC �ݱ���
-�{���������ˬd `\r` �� `\n` �ӧP�_�R�O�����G
+#### PC 端接收
+程式接收時檢查 `\r` 或 `\n` 來判斷命令結束：
 
 ```vb
 If responseBuffer.Contains(vbLf) OrElse responseBuffer.Contains(vbCr) Then
-    ' �̾� \r\n�B\n �� \r ���θ��
+    ' 依據 \r\n、\n 或 \r 分割資料
     Dim lines() As String = responseBuffer.Split(
         New String() {vbCrLf, vbLf, vbCr}, 
         StringSplitOptions.RemoveEmptyEntries)
 End If
 ```
 
-### �����Ÿ������n��
+### 結束符號的重要性
 
-1. **�R�O�ɩw**�G�Ϥ����P���R�O�Φ^��
-2. **��Ƨ����**�G�T�O�����짹�㪺�R�O�~�i��B�z
-3. **��w�@�P��**�GPC �P MCU ���襲���ϥάۦP�������Ÿ�
-4. **���~�קK**�G����R�O�H�s�γQ�I�_
+1. **命令界定**：區分不同的命令或回應
+2. **資料完整性**：確保接收到完整的命令才進行處理
+3. **協定一致性**：PC 與 MCU 雙方必須使用相同的結束符號
+4. **錯誤避免**：防止命令黏連或被截斷
 
 ---
 
-## �i�ԲөR�O�����j
+## 【詳細命令說明】
 
-### 1. ��l�ƴ��� (HELLO)
+### 1. 初始化握手 (HELLO)
 
-**�R�O�榡**�G
+**命令格式**：
 ```
 HELLO\r\n
 ```
 
-**Ĳ�o�ɾ�**�G
-- ���U Open ���s�}�ҳs�u��
+**觸發時機**：
+- 按下 Open 按鈕開啟連線時
 
-**�w���^��**�G
+**預期回應**：
 ```
 OK\r\n
 ```
 
-**�{���X��m**�G`Form1.vb` �� 138 ��
+**程式碼位置**：`Form1.vb` 第 138 行
 
 ---
 
-### 2. �ɶ��P�B (T)
+### 2. 時間同步 (T)
 
-**�R�O�榡**�G
+**命令格式**：
 ```
 Tyyyy/MM/dd HH:mm:ss\r\n
 ```
 
-**��ڽd��**�G
+**實際範例**：
 ```
 T2025/01/03 14:30:45\r\n
 T2025/12/25 23:59:59\r\n
 ```
 
-**Ĳ�o�ɾ�**�G
-1. �s�u���A�U�A�C���۰ʵo�e�]`timerClock_Tick`�^
-2. ����I�� Time Sync ���s
-3. �����ܼҦ� 2�]��ܳ]�m�^�ɦ۰ʵo�e
+**觸發時機**：
+1. 連線狀態下，每秒自動發送（`timerClock_Tick`）
+2. 手動點擊 Time Sync 按鈕
+3. 切換至模式 2（顯示設置）時自動發送
 
-**�ɶ��榡����**�G
-- `yyyy`: �|��Ʀ~��
-- `MM`: ���Ƥ���]01-12�^
-- `dd`: ���Ƥ���]01-31�^
-- `HH`: ���Ƥp�ɡ]00-23�A24�p�ɨ�^
-- `mm`: ���Ƥ����]00-59�^
-- `ss`: ���Ƭ��ơ]00-59�^
+**時間格式說明**：
+- `yyyy`: 四位數年份
+- `MM`: 兩位數月份（01-12）
+- `dd`: 兩位數日期（01-31）
+- `HH`: 兩位數小時（00-23，24小時制）
+- `mm`: 兩位數分鐘（00-59）
+- `ss`: 兩位數秒數（00-59）
 
-**�w���^��**�G
+**預期回應**：
 ```
 OK\r\n
 ```
 
-**�{���X��m**�G`Form1.vb` �� 231-236 ��
+**程式碼位置**：`Form1.vb` 第 231-236 行
 
 ---
 
-### 3. �t�θ�T (S)
+### 3. 系統資訊 (S)
 
-**�R�O�榡**�G
+**命令格式**：
 ```
 Scpu=XX;ram=X.X/XX.X\r\n
 ```
 
-**��ڽd��**�G
+**實際範例**：
 ```
 Scpu=58;ram=8.3/15.9\r\n
 Scpu=12;ram=4.2/16.0\r\n
 Scpu=95;ram=12.8/32.0\r\n
 ```
 
-**��Ʋզ�**�G
-- `cpu=XX`: CPU �ϥβv�]��Ʀʤ���A0-100�^
-- `ram=X.X/XX.X`: RAM �ϥζq�]�w��/�`�q�A��� GB�A�O�d�@��p�ơ^
+**資料組成**：
+- `cpu=XX`: CPU 使用率（整數百分比，0-100）
+- `ram=X.X/XX.X`: RAM 使用量（已用/總量，單位 GB，保留一位小數）
 
-**Ĳ�o�ɾ�**�G
-1. �s�u���A�U�A�C���۰ʵo�e�]`timerSystemInfo_Tick`�^
-2. �����ܼҦ� 3�]�q����T�^�ɦ۰ʵo�e
+**觸發時機**：
+1. 連線狀態下，每秒自動發送（`timerSystemInfo_Tick`）
+2. 切換至模式 3（電腦資訊）時自動發送
 
-**�ƭȽd��**�G
-- CPU: 0-100�]�ʤ���^
-- RAM �w��: 0.0 �ܹ���O�����`�q
-- RAM �`�q: ����O�����`�q�]GB�^
+**數值範圍**：
+- CPU: 0-100（百分比）
+- RAM 已用: 0.0 至實體記憶體總量
+- RAM 總量: 實體記憶體總量（GB）
 
-**�w���^��**�G
+**預期回應**：
 ```
 OK\r\n
 ```
 
-**�{���X��m**�G`Form1.vb` �� 281-294 ��
+**程式碼位置**：`Form1.vb` 第 281-294 行
 
 ---
 
-### 4. �Ҧ����� 1 - ��w�ù� (M1)
+### 4. 模式切換 1 - 鎖定螢幕 (M1)
 
-**�R�O�榡**�G
+**命令格式**：
 ```
 M1\r\n
 ```
 
-**Ĳ�o�ɾ�**�G
-- �Ҧ�����ܡu1-��w�ù��v�]`cmbMode.SelectedIndex = 0`�^
+**觸發時機**：
+- 模式選單選擇「1-鎖定螢幕」（`cmbMode.SelectedIndex = 0`）
 
-**MCU �欰**�G
-- �����ܪ�l���A/��w�ù����
+**MCU 行為**：
+- 切換至初始狀態/鎖定螢幕顯示
 
-**�w���^��**�G
+**預期回應**：
 ```
 OK\r\n
 ```
 
-**�{���X��m**�G`Form1.vb` �� 244 ��
+**程式碼位置**：`Form1.vb` 第 244 行
 
 ---
 
-### 5. �Ҧ����� 2 - ��ܳ]�m (M2)
+### 5. 模式切換 2 - 顯示設置 (M2)
 
-**�R�O�榡**�G
+**命令格式**：
 ```
 M2\r\n
 ```
 
-**Ĳ�o�ɾ�**�G
-- �Ҧ�����ܡu2-��ܳ]�m�v�]`cmbMode.SelectedIndex = 1`�^
+**觸發時機**：
+- 模式選單選擇「2-顯示設置」（`cmbMode.SelectedIndex = 1`）
 
-**���[�ʧ@**�G
-- �o�e M2 �R�O��A**�۰ʵo�e�ɶ��P�B**���
+**附加動作**：
+- 發送 M2 命令後，**自動發送時間同步**資料
 
-**�R�O�ǦC**�G
+**命令序列**：
 ```
 M2\r\n
 T2025/01/03 14:30:45\r\n
 ```
 
-**MCU �欰**�G
-- ��������ܳ]�m�Ҧ�
-- ��s�ɶ����
+**MCU 行為**：
+- 切換至顯示設置模式
+- 更新時間顯示
 
-**�w���^��**�G
+**預期回應**：
 ```
 OK\r\n
 OK\r\n
 ```
 
-**�{���X��m**�G`Form1.vb` �� 246-247 ��
+**程式碼位置**：`Form1.vb` 第 246-247 行
 
 ---
 
-### 6. �Ҧ����� 3 - �q����T (M3)
+### 6. 模式切換 3 - 電腦資訊 (M3)
 
-**�R�O�榡**�G
+**命令格式**：
 ```
 M3\r\n
 ```
 
-**Ĳ�o�ɾ�**�G
-- �Ҧ�����ܡu3-�q����T�v�]`cmbMode.SelectedIndex = 2`�^
+**觸發時機**：
+- 模式選單選擇「3-電腦資訊」（`cmbMode.SelectedIndex = 2`）
 
-**���[�ʧ@**�G
-- �o�e M3 �R�O��A**�۰ʵo�e�t�θ�T**���
+**附加動作**：
+- 發送 M3 命令後，**自動發送系統資訊**資料
 
-**�R�O�ǦC**�G
+**命令序列**：
 ```
 M3\r\n
 Scpu=58;ram=8.3/15.9\r\n
 ```
 
-**MCU �欰**�G
-- �����ܹq����T�Ҧ�
-- ��� CPU �P RAM ��T
+**MCU 行為**：
+- 切換至電腦資訊模式
+- 顯示 CPU 與 RAM 資訊
 
-**�w���^��**�G
+**預期回應**：
 ```
 OK\r\n
 OK\r\n
 ```
 
-**�{���X��m**�G`Form1.vb` �� 249-250 ��
+**程式碼位置**：`Form1.vb` 第 249-250 行
 
 ---
 
-### 7. Ū�� EEPROM (R)
+### 7. 讀取 EEPROM (R)
 
-**�R�O�榡**�G
+**命令格式**：
 ```
 R\r\n
 ```
 
-**Ĳ�o�ɾ�**�G
-- �I�� Read ���s�]`btnRead_Click`�^
+**觸發時機**：
+- 點擊 Read 按鈕（`btnRead_Click`）
 
-**MCU �欰**�G
-- �q EEPROM Ū�� LED �}��]�w��
-- �^��Ū���쪺�ƭ�
+**MCU 行為**：
+- 從 EEPROM 讀取 LED 腳位設定值
+- 回傳讀取到的數值
 
-**�w���^��**�G
+**預期回應**：
 ```
 VAL=xxx\r\n
 ```
 
-**�^���d��**�G
+**回應範例**：
 ```
-VAL=255\r\n    (�w�]��/����Ū��)
-VAL=1\r\n      (�̤p��)
-VAL=230\r\n    (�@���)
-VAL=254\r\n    (�̤j��)
+VAL=255\r\n    (預設值/首次讀取)
+VAL=1\r\n      (最小值)
+VAL=230\r\n    (一般值)
+VAL=254\r\n    (最大值)
 ```
 
-**PC �ݳB�z**�G
-- �ѪR `VAL=` �᪺�ƭ�
-- ��ܩ� `txtLEDOutput` ��r��
+**PC 端處理**：
+- 解析 `VAL=` 後的數值
+- 顯示於 `txtLEDOutput` 文字框
 
-**�{���X��m**�G`Form1.vb` �� 298 ��
+**程式碼位置**：`Form1.vb` 第 298 行
 
 ---
 
-### 8. �g�J EEPROM (L)
+### 8. 寫入 EEPROM (L)
 
-**�R�O�榡**�G
+**命令格式**：
 ```
 Lxxx\r\n
 ```
 
-**��ڽd��**�G
+**實際範例**：
 ```
-L1\r\n      (�̤p��)
-L100\r\n    (�@���)
-L230\r\n    (�@���)
-L254\r\n    (�̤j��)
+L1\r\n      (最小值)
+L100\r\n    (一般值)
+L230\r\n    (一般值)
+L254\r\n    (最大值)
 ```
 
-**Ĳ�o�ɾ�**�G
-- �I�� Write ���s�]`btnWrite_Click`�^
+**觸發時機**：
+- 點擊 Write 按鈕（`btnWrite_Click`）
 
-**�ƭȭ���**�G
-- **���Ľd��**: 1-254�]�t�^
-- **�T���**: 0, 255 �νd��~����
+**數值限制**：
+- **有效範圍**: 1-254（含）
+- **禁止值**: 0, 255 及範圍外的值
 
-**PC ������**�G
-1. �ˬd�O�_�����ļƦr�榡
-2. �ˬd�ƭȬO�_�b 1-254 �d��
-3. ���ҳq�L�~�o�e�R�O
+**PC 端驗證**：
+1. 檢查是否為有效數字格式
+2. 檢查數值是否在 1-254 範圍內
+3. 驗證通過才發送命令
 
-**���ҿ��~�T��**�G
-- �D�Ʀr�榡�G�u�п�J���Ī��Ʀr�v
-- �d����~�G�uLED �}��ȥ����b 1-254 �����v
+**驗證錯誤訊息**：
+- 非數字格式：「請輸入有效的數字」
+- 範圍錯誤：「LED 腳位值必須在 1-254 之間」
 
-**MCU �欰**�G
-- �N�ƭȼg�J EEPROM
-- �^�Ǽg�J���\�T��
+**MCU 行為**：
+- 將數值寫入 EEPROM
+- 回傳寫入成功訊息
 
-**�w���^��**�G
+**預期回應**：
 ```
 WRITE OK\r\n
 ```
 
-**PC �ݳB�z**�G
-- ������ `WRITE OK` ����ܦ��\�T��
-- �u�X��ܮءG�uEEPROM �g�J���\�v
+**PC 端處理**：
+- 接收到 `WRITE OK` 後顯示成功訊息
+- 彈出對話框：「EEPROM 寫入成功」
 
-**�{���X��m**�G`Form1.vb` �� 318 ��
-
----
-
-## �i�q�T�y�{�d�ҡj
-
-### �d�� 1�G����s�u�إ߬y�{
-
-```
-PC �� MCU: HELLO\r\n
-MCU �� PC: OK\r\n
-
-[�s�u�إߦ��\�ADevice Status �ܬ� Online]
-
-PC �� MCU: T2025/01/03 14:30:45\r\n    (�C���۰ʵo�e)
-MCU �� PC: OK\r\n
-
-PC �� MCU: Scpu=58;ram=8.3/15.9\r\n   (�C���۰ʵo�e)
-MCU �� PC: OK\r\n
-```
+**程式碼位置**：`Form1.vb` 第 318 行
 
 ---
 
-### �d�� 2�G�Ҧ������y�{
+## 【通訊流程範例】
 
-#### �����ܼҦ� 2�]��ܳ]�m�^
+### 範例 1：完整連線建立流程
+
 ```
-PC �� MCU: M2\r\n
-MCU �� PC: OK\r\n
+PC → MCU: HELLO\r\n
+MCU → PC: OK\r\n
 
-PC �� MCU: T2025/01/03 14:30:45\r\n    (�۰ʪ��a�ɶ��P�B)
-MCU �� PC: OK\r\n
-```
+[連線建立成功，Device Status 變為 Online]
 
-#### �����ܼҦ� 3�]�q����T�^
-```
-PC �� MCU: M3\r\n
-MCU �� PC: OK\r\n
+PC → MCU: T2025/01/03 14:30:45\r\n    (每秒自動發送)
+MCU → PC: OK\r\n
 
-PC �� MCU: Scpu=58;ram=8.3/15.9\r\n   (�۰ʪ��a�t�θ�T)
-MCU �� PC: OK\r\n
+PC → MCU: Scpu=58;ram=8.3/15.9\r\n   (每秒自動發送)
+MCU → PC: OK\r\n
 ```
 
 ---
 
-### �d�� 3�GEEPROM Ū�g�y�{
+### 範例 2：模式切換流程
 
-#### Ū���y�{
+#### 切換至模式 2（顯示設置）
 ```
-PC �� MCU: R\r\n
-MCU �� PC: VAL=255\r\n
+PC → MCU: M2\r\n
+MCU → PC: OK\r\n
 
-[PC ��ܩ� txtLEDOutput: 255]
-```
-
-#### �g�J�y�{
-```
-[�ϥΪ̿�J: 230]
-[PC ���ҡG1 ? 230 ? 254�A�q�L]
-
-PC �� MCU: L230\r\n
-MCU �� PC: WRITE OK\r\n
-
-[PC ��ܰT���G�uEEPROM �g�J���\�v]
+PC → MCU: T2025/01/03 14:30:45\r\n    (自動附帶時間同步)
+MCU → PC: OK\r\n
 ```
 
-#### �A��Ū������
+#### 切換至模式 3（電腦資訊）
 ```
-PC �� MCU: R\r\n
-MCU �� PC: VAL=230\r\n
+PC → MCU: M3\r\n
+MCU → PC: OK\r\n
 
-[PC ��ܩ� txtLEDOutput: 230]
+PC → MCU: Scpu=58;ram=8.3/15.9\r\n   (自動附帶系統資訊)
+MCU → PC: OK\r\n
 ```
 
 ---
 
-## �i��Ʈ榡�W�d�j
+### 範例 3：EEPROM 讀寫流程
 
-### �r���s�X
-- �Ҧ��R�O�P�^���ϥ� **ASCII �s�X**
-- ���䴩 Unicode �Φh�줸�զr��
+#### 讀取流程
+```
+PC → MCU: R\r\n
+MCU → PC: VAL=255\r\n
 
-### �j�p�g�W�d
-- �R�O�e��]HELLO�BT�BS�BM�BR�BL�^�ϥ�**�j�g**
-- �^���T���]OK�BVAL�BWRITE OK�^�ϥ�**�j�g**
-- �j�p�g�ӷP�A���Y����u
+[PC 顯示於 txtLEDOutput: 255]
+```
 
-### �ťզr��
-- �R�O��**���]�t�e�ɩΫ��ť�**
-- �����춡�ϥ� `;` ���j�A**���t�Ů�**
-- �d�ҥ��T�G`Scpu=58;ram=8.3/15.9`
-- �d�ҿ��~�G`S cpu=58 ; ram=8.3/15.9`�]�t�Ů�^
+#### 寫入流程
+```
+[使用者輸入: 230]
+[PC 驗證：1 ≤ 230 ≤ 254，通過]
 
-### �ƭȮ榡
-- **���**�G�������ܡA���t�e�ɹs�]�ҥ~�G�ɶ��榡�^
-- **�B�I��**�G�ϥΤp���I�A�O�d�@��p�ơ]CPU ���~�^
-- **�ɶ��ƭ�**�G�ϥΫe�ɹs�ɻ����ơ]�Ҧp�G`01`, `09`�^
+PC → MCU: L230\r\n
+MCU → PC: WRITE OK\r\n
 
----
+[PC 顯示訊息：「EEPROM 寫入成功」]
+```
 
-## �i���~�B�z�j
+#### 再次讀取驗證
+```
+PC → MCU: R\r\n
+MCU → PC: VAL=230\r\n
 
-### �W�ɳB�z
-- **Ū���W��**: 2000 ms
-- **�g�J�W��**: 2000 ms
-- �W�ɫ�{�����O�����~�ô��ܨϥΪ�
-
-### �L�ĩR�O
-- MCU ����L�k�ѧO���R�O�������Φ^�����~�T��
-- PC �����]�p�������ѪR�޿�A�קK�o�e�L�ĩR�O
-
-### �s�u���_
-- PC ���˴���s�u���_�����G
-  1. ����Ҧ� Timer
-  2. ��s Device Status �� Offline
-  3. ���ΩҦ����
-  4. ���ܨϥΪ̭��s�s�u
+[PC 顯示於 txtLEDOutput: 230]
+```
 
 ---
 
-## �i��@�ˬd�M��j
+## 【資料格式規範】
 
-�}�o�δ��ծɡA�нT�{�H�U���ءG
+### 字元編碼
+- 所有命令與回應使用 **ASCII 編碼**
+- 不支援 Unicode 或多位元組字元
 
-- [ ] �Ҧ��R�O�����T���[ `\r\n` �����Ÿ�
-- [ ] �����ݥ��T�ѪR `\r\n` �@���R�O�����аO
-- [ ] �ƭȮ榡�ŦX�W�d�]��ơB�B�I�Ʈ榡�^
-- [ ] �ɶ��榡�ϥΫe�ɹs�]`01`-`09`�^
-- [ ] ��J���ҽd�򥿽T�]LED: 1-254�^
-- [ ] �R�O�j�p�g���T�]�����j�g�^
-- [ ] �L�h�l�ťզr��
-- [ ] �W�ɾ���`�B�@
-- [ ] ���~�B�z����
+### 大小寫規範
+- 命令前綴（HELLO、T、S、M、R、L）使用**大寫**
+- 回應訊息（OK、VAL、WRITE OK）使用**大寫**
+- 大小寫敏感，須嚴格遵守
+
+### 空白字元
+- 命令中**不包含前導或後綴空白**
+- 資料欄位間使用 `;` 分隔，**不含空格**
+- 範例正確：`Scpu=58;ram=8.3/15.9`
+- 範例錯誤：`S cpu=58 ; ram=8.3/15.9`（含空格）
+
+### 數值格式
+- **整數**：直接表示，不含前導零（例外：時間格式）
+- **浮點數**：使用小數點，保留一位小數（CPU 除外）
+- **時間數值**：使用前導零補齊兩位數（例如：`01`, `09`）
 
 ---
 
-## �i�������j
+## 【錯誤處理】
 
-- [README.md](README.md) - �M�׻������
-- [PC_FunctionSpec.md](PC_FunctionSpec.md) - PC �ݥ\��W���
-- [Form1.vb](Form1.vb) - �D�{����@
+### 超時處理
+- **讀取超時**: 2000 ms
+- **寫入超時**: 2000 ms
+- 超時後程式應記錄錯誤並提示使用者
+
+### 無效命令
+- MCU 收到無法識別的命令應忽略或回應錯誤訊息
+- PC 端應設計健壯的解析邏輯，避免發送無效命令
+
+### 連線中斷
+- PC 端檢測到連線中斷時應：
+  1. 停止所有 Timer
+  2. 更新 Device Status 為 Offline
+  3. 停用所有控制項
+  4. 提示使用者重新連線
 
 ---
 
-**��󪩥�**: v1.0  
-**���@��**: Tseng  
-**�̫��s**: 2025-01-03
+## 【實作檢查清單】
+
+開發或測試時，請確認以下項目：
+
+- [ ] 所有命令都正確附加 `\r\n` 結束符號
+- [ ] 接收端正確解析 `\r\n` 作為命令結束標記
+- [ ] 數值格式符合規範（整數、浮點數格式）
+- [ ] 時間格式使用前導零（`01`-`09`）
+- [ ] 輸入驗證範圍正確（LED: 1-254）
+- [ ] 命令大小寫正確（全部大寫）
+- [ ] 無多餘空白字元
+- [ ] 超時機制正常運作
+- [ ] 錯誤處理完整
+
+---
+
+## 【相關文件】
+
+- [README.md](README.md) - 專案說明文件
+- [PC_FunctionSpec.md](PC_FunctionSpec.md) - PC 端功能規格書
+- [Form1.vb](Form1.vb) - 主程式實作
+
+---
+
+**文件版本**: v1.0  
+**維護者**: Tseng  
+**最後更新**: 2025-01-03
